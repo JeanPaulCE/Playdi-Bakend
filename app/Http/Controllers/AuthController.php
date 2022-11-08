@@ -69,6 +69,13 @@ class AuthController extends Controller
 
         return response($response, 201);
     }
+    public function nan (Request $request) {
+        
+        $response = [
+                'hi' => $request->getContent(),
+            ];
+        return response($response, 201);
+    }
 
     public function logout(Request $request) {
         auth()->user()->tokens()->delete();

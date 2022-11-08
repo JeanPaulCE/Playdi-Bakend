@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 
 class Game extends Controller
 {
+
     public function getData()
     {
         return "hi";
     }
+
     public function sendData()
     {
         return "hi";
@@ -19,4 +21,9 @@ class Game extends Controller
     {
          return "hi";
     }
+
+    public function getShare(){
+        return "hi";
+    }
+    
 }

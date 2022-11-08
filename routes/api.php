@@ -20,15 +20,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register',   [AuthController::class, 'register'  ]);
 Route::post('/login'   ,   [AuthController::class, 'login'     ]);
-
+Route::get('/', [AuthController::class, 'nan']);
 
 Route::group(['middleware'=>['auth:sanctum']],function(){
 
     Route::get('/getdata',[Game::class,'getData']);
     Route::get('/senddata',[Game::class,'sendData']);
-    
     Route::get('/share',[Game::class,'share']);
-
+    Route::get('/getShare',[Game::class,'getShare']);
+   
     Route::post('/logout',[AuthController::class,'logout']);
-
 });

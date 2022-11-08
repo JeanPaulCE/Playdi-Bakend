@@ -72,7 +72,7 @@ class AuthController extends Controller
     public function nan (Request $request) {
         
         $response = [
-                'hi' => $request->getContent(),
+                'hi' => "2hi",
             ];
         return response($response, 201);
     }

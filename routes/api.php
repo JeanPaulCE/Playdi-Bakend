@@ -24,7 +24,7 @@ Route::get('/', [AuthController::class, 'nan']);
 
 Route::group(['middleware'=>['auth:sanctum']],function(){
 
-    Route::get('/getdata',[Game::class,'getData']);
+    Route::post('/cambios',[Game::class,'cambios']);
     Route::get('/senddata',[Game::class,'sendData']);
     Route::get('/share',[Game::class,'share']);
     Route::get('/getShare',[Game::class,'getShare']);

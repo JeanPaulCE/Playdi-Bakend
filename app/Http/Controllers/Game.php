@@ -13,6 +13,12 @@ use PhpParser\Node\Expr\Cast\String_;
 class Game extends Controller
 {
 
+    public function validate_(Request $request)
+    {
+        $res = ["res" => "200"];
+        return response($res, 201);
+    }
+
     public function getData(Request $request)
     {
         $cartas = Carta::where('users_id', Auth::user()->id)->get();
@@ -34,55 +40,6 @@ class Game extends Controller
         $cambios = Cambio::where('users_id', Auth::user()->id)->get();
         $cambios_enviados =  json_decode($request->input("cambios"))->cambios;
 
-        if (count($cambios) > 0) {
-            for ($i = 0; $i < count($cambios); $i++) {
-                $cambios[$i]["fecha"] = strtotime($cambios[$i]["fecha"]);
-                $aux2[$i] =  strtotime($cambios[$i]["fecha"]);
-            }
-            array_multisort($aux2, SORT_DESC, $cambios);
-        } else {
-
-            foreach ($cambios_enviados as $key => $cambio) {
-                $tabla   =  $cambio["tabla"];
-                $accion  =  $cambio["accion"];
-                $fecha   =  $cambio["fecha"];
-                $contenido = $cambio["contenido"];
-
-                switch ($tabla) {
-                    case 'Cartas':
-                        $res = Carta::create([
-                            'users_id' => Auth::user()->id,
-                            'titulo' => $contenido["titulo"],
-                            'reto' => $contenido["reto"],
-                            'castigo' => $contenido["castigo"]
-                        ]);
-
-                        break;
-                    case 'Categorias':
-                        $res = Categoria::create([
-                            'users_id' => Auth::user()->id,
-                            'titulo' => $contenido["titulo"],
-                        ]);
-                        break;
-                    case 'Carta_Categoria':
-                        
-                        
-
-                        break;
-                    default:
-                        # code...
-                        break;
-                }
-            }
-
-
-            $res = [
-                "type" => 1,
-                "aplciado" => $cambios_enviados
-            ];
-            return response($res, 201);
-        }
-
         if (count($cambios_enviados) > 0) {
             for ($i = 0; $i < count($cambios_enviados); $i++) {
                 $cambios_enviados[$i]["fecha"] = strtotime($cambios_enviados[$i]["fecha"]);
@@ -94,7 +51,20 @@ class Game extends Controller
             return response($this->getAll(), 201);
         }
 
-        $this->generarSolicitud($cambios, $cambios_enviados);
+        if (count($cambios) > 0) {
+            for ($i = 0; $i < count($cambios); $i++) {
+                $cambios[$i]["fecha"] = strtotime($cambios[$i]["fecha"]);
+                $aux2[$i] =  strtotime($cambios[$i]["fecha"]);
+            }
+            array_multisort($aux2, SORT_DESC, $cambios);
+        } else {
+
+            $res = $this->aplyChanges($cambios_enviados);
+            return response($res, 201);
+        }
+
+        $this->generarRequeridos($cambios, $cambios_enviados);
+        $this->aplicacionSelectiva($cambios, $cambios_enviados);
     }
 
     public function getShare()
@@ -115,9 +85,70 @@ class Game extends Controller
             "cambios" => $cambios
         ];
     }
+    private function aplicacionSelectiva($cambios, $cambios_enviados)
+    {
+        for ($i=0; $i < count($cambios_enviados); $i++) { 
+            
+        }
 
-    public function generarSolicitud($cambios, $cambios_enviados)
+
+    }
+    private function generarRequeridos($cambios, $cambios_enviados)
     {
         $bace = (count($cambios) < count($cambios_enviados)) ? $cambios_enviados : $cambios;
+
+
+    }
+
+    private function aplyChanges($cambios)
+    {
+        for ($i = 0; $i < count($cambios); $i++) {
+
+            $tabla   =   $cambios[$i]["tabla"];
+            $accion  =   $cambios[$i]["accion"];
+            $fecha   =   $cambios[$i]["fecha"];
+            $contenido = $cambios[$i]["contenido"];
+
+
+
+            switch ($tabla) {
+                case 'Cartas':
+                    $carta = new Carta;
+                    $carta->users_id = Auth::user()->id;
+                    $carta->titulo = $contenido["titulo"];
+                    $carta->reto = $contenido["reto"];
+                    $carta->castigo = $contenido["castigo"];
+                    $carta->save();
+                    $id = $carta->id;
+                    for ($i = 0; $i < count($cambios[$i]["contenido"]["Categorias"]); $i++) {
+                        $categoria = json_decode($cambios[$i]["contenido"]["Categorias"][$i]);
+                        $categoria_ = Categoria::where("users_id", Auth::user()->id)->where("titulo", $categoria["titulo"])->get();
+                        if (count($categoria_) > 0) {
+                            $carta->categorias()->attach($categoria_[0]);
+                        }
+                    }
+
+                    break;
+                case 'Categorias':
+
+                    $categoria = new Categoria;
+                    $categoria->users_id = Auth::user()->id;
+                    $categoria->titulo = $contenido["titulo"];
+                    $categoria->save();
+                    $id = $categoria->id;
+                    break;
+                default:
+                    # code...
+                    break;
+            }
+
+            $cambio = Cambio::create([
+                "users_id"              =>  Auth::user()->id,
+                'tabla'                 =>  $tabla,
+                "id_Relacionado"        =>  $id,
+                'accion'                =>  $accion,
+                'fecha'                 =>  $fecha
+            ]);
+        }
     }
 }

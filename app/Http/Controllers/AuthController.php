@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -38,11 +40,14 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('myapptoken', now()->addSeconds(10))->accessToken;
+
+
 
         $response = [
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'expired_at' => $token->expired_at
         ];
 
         return response($response, 201);
@@ -65,15 +70,17 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('my-apptoken', Carbon::now()->addSeconds(10));
 
         $response = [
             'user' => $user,
-            'token' => $token
+            'token' => $token->plainTextToken,
+            'expired_at' => $token->accessToken->expired_at
         ];
 
         return response($response, 201);
     }
+
     public function nan(Request $request)
     {
 

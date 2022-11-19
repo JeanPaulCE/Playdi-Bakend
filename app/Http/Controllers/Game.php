@@ -7,11 +7,14 @@ use Illuminate\Http\Request;
 use App\Models\Carta;
 use App\Models\Categoria;
 use App\Models\Cambio;
+use App\Models\User;
 use Auth;
 use PhpParser\Node\Expr\Cast\String_;
+use PhpParser\Node\Stmt\Switch_;
 
 class Game extends Controller
 {
+
 
     public function validate_(Request $request)
     {
@@ -19,60 +22,130 @@ class Game extends Controller
         return response($res, 201);
     }
 
-    public function getData(Request $request)
-    {
-        $cartas = Carta::where('users_id', Auth::user()->id)->get();
-        $categorias = Categoria::where('users_id', Auth::user()->id)->get();
-        $cambios = Cambio::where('users_id', Auth::user()->id)->get();
 
-        $res = [
-            "cartas" => $cartas,
-            "categorias" => $categorias,
-            "cambios" => $cambios
-        ];
-
-        return response($res, 201);
-    }
-
+    //!!Pruebas requeridas
     public function cambios(Request $request)
     {
+        //peticion sin contenido retorna todos los datos
+        if (!$request->has("cambios")) return response($this->getAll(), 200);
 
         $cambios = Cambio::where('users_id', Auth::user()->id)->get();
-        $cambios_enviados =  json_decode($request->input("cambios"))->cambios;
+        $cambios_enviados =  json_decode($request->input("cambios"))->cambio;
+        $cartas_enviados =  json_decode($request->input("cambios"))->cartas;
+        $categorias_enviados =  json_decode($request->input("cambios"))->categorias;
 
-        if (count($cambios_enviados) > 0) {
-            for ($i = 0; $i < count($cambios_enviados); $i++) {
-                $cambios_enviados[$i]["fecha"] = strtotime($cambios_enviados[$i]["fecha"]);
-                $aux[$i] =  strtotime($cambios_enviados[$i]["fecha"]);
-            }
-            array_multisort($aux, SORT_DESC, $cambios_enviados);
-        } {
 
-            return response($this->getAll(), 201);
+        //peticion con contenido y base de datos limpa guarda todo lo enviado 
+        if (count($cambios) <= 0) {
+
+            $this->aplyChanges("categorias", $categorias_enviados);
+            $this->aplyChanges("cartas", $cartas_enviados);
+
+            $cambio = new Cambio;
+
+            $cambio->users_id = Auth::user()->id;
+            $cambio->tabla = $cambios_enviados->tabla;
+            $cambio->id_relacionado = $cambios_enviados->id_relacionado;
+            $cambio->accion = $cambios_enviados->accion;
+            $cambio->fecha =  $cambios_enviados->fecha;
+            $cambio->save();
+
+            $res = [
+                "type" => 1
+            ];
+            return response($res, 200);
         }
 
-        if (count($cambios) > 0) {
+        //si hay mas de un cambio local ordena de reciente a antiguo
+        if (count($cambios) > 1) {
             for ($i = 0; $i < count($cambios); $i++) {
                 $cambios[$i]["fecha"] = strtotime($cambios[$i]["fecha"]);
                 $aux2[$i] =  strtotime($cambios[$i]["fecha"]);
             }
             array_multisort($aux2, SORT_DESC, $cambios);
-        } else {
-
-            $res = $this->aplyChanges($cambios_enviados);
-            return response($res, 201);
         }
 
-        $this->generarRequeridos($cambios, $cambios_enviados);
-        $this->aplicacionSelectiva($cambios, $cambios_enviados);
+
+        //si lo enviado y lo ya almacenado es lo mismo
+        if ($cambios[0]->fecha == $cambios_enviados->fecha) {
+            $res = [
+                "type" => 2
+            ];
+            return response($res, 200);
+        }
+
+        $fecha_local = $cambios[0]->fecha;
+        $fecha_remota = $cambios_enviados->fecha;
+
+        //lo enviado es mas antiguo que lo guardado, se retorna lo guardado
+        if ($fecha_local > $fecha_remota) {
+            return response($this->getAll(), 204);
+        } else {
+            //lo enviado es mas reciente que lo guardado, se sustitulle lo guardado por lo enviado
+            $this->aplyChanges("categorias", $categorias_enviados);
+            $this->aplyChanges("cartas", $cartas_enviados);
+            $cambio = new Cambio;
+
+            $cambio->users_id = Auth::user()->id;
+            $cambio->tabla = $cambios_enviados->tabla;
+            $cambio->id_relacionado = $cambios_enviados->id_relacionado;
+            $cambio->accion = $cambios_enviados->accion;
+            $cambio->fecha = $cambios_enviados->fecha;
+            $cambio->save();
+
+
+            $res = [
+                "type" => 1
+            ];
+            return response($res, 200);
+        }
     }
 
-    public function getShare()
+    //!!!!implementar tabla
+    public function makeShare(Request $request)
     {
-        return "hi";
+        $categoria_recibida = $cambios_enviados =  json_decode($request->input("categoria"));
+        $compartido = new Compartido; //::where("codigo", $codigo)->where("nombre", $nombre);
+        $compartido->codigo =  substr((time() + ""), -5) + rand(10, 99);
+        $compartido->nombre =  Auth::user()->name;
+        $compartido->users_id = Auth::user()->id;
+        $compartido->id_categoria = Categoria::where('users_id',  Auth::user()->id)->where('titulo', $categoria_recibida->titulo)->first()->id;
+        $compartido->save();
+        return response($compartido, 201);
     }
 
-    public function getAll()
+    //!!!!implementar tabla
+    public function getShare(Request $request)
+    {
+        $nombre =  $request->input("nombre");
+        $codigo =  $request->input("codigo");
+
+        $compartido = Compartido::where("codigo", $codigo)->where("nombre", $nombre);
+        $idCategoria =  $compartido->id_categoria;
+        $categoria = Categoria::where("id", $idCategoria)->first();
+        $cartas = $categoria->cartas();
+
+        $nCategoria = new Categoria;
+        $nCategoria->users_id = Auth::user()->id;
+        $nCategoria->titulo = $categoria->titulo;
+        $nCategoria->save();
+
+        foreach ($cartas as $key => $value) {
+            $carta = new Carta;
+            $carta->users_id = Auth::user()->id;
+            //$carta->global_ID = $datos[$i]->global_ID;
+            $carta->titulo = $value->titulo;
+            $carta->reto = $value->reto;
+            $carta->castigo = $value->castigo;
+            $carta->save();
+            $category = Categoria::where('users_id',  Auth::user()->id)->where('titulo', $nCategoria->titulo)->first();
+            $carta->categorias()->attach($category);
+        }
+
+        return response($this->getAll(), 201);
+    }
+
+    private function getAll()
     {
         $cartas = Carta::where('users_id', Auth::user()->id)->get();
         $categorias = Categoria::where('users_id', Auth::user()->id)->get();
@@ -85,70 +158,48 @@ class Game extends Controller
             "cambios" => $cambios
         ];
     }
-    private function aplicacionSelectiva($cambios, $cambios_enviados)
+
+    private function aplyChanges($tabla, $datos)
     {
-        for ($i=0; $i < count($cambios_enviados); $i++) { 
-            
+        switch ($tabla) {
+            case 'cartas':
+                Carta::where('users_id',  Auth::user()->id)->delete();
+                break;
+            case 'categorias':
+                Categoria::where('users_id',  Auth::user()->id)->delete();
+                break;
+            default:
+                # code...
+                break;
         }
-
-
-    }
-    private function generarRequeridos($cambios, $cambios_enviados)
-    {
-        $bace = (count($cambios) < count($cambios_enviados)) ? $cambios_enviados : $cambios;
-
-
-    }
-
-    private function aplyChanges($cambios)
-    {
-        for ($i = 0; $i < count($cambios); $i++) {
-
-            $tabla   =   $cambios[$i]["tabla"];
-            $accion  =   $cambios[$i]["accion"];
-            $fecha   =   $cambios[$i]["fecha"];
-            $contenido = $cambios[$i]["contenido"];
-
-
-
+        for ($i = 0; $i < count($datos); $i++) {
             switch ($tabla) {
-                case 'Cartas':
+                case 'cartas':
                     $carta = new Carta;
                     $carta->users_id = Auth::user()->id;
-                    $carta->titulo = $contenido["titulo"];
-                    $carta->reto = $contenido["reto"];
-                    $carta->castigo = $contenido["castigo"];
+                    //$carta->global_ID = $datos[$i]->global_ID;
+                    $carta->titulo = $datos[$i]->titulo;
+                    $carta->reto = $datos[$i]->reto;
+                    $carta->castigo = $datos[$i]->castigo;
                     $carta->save();
-                    $id = $carta->id;
-                    for ($i = 0; $i < count($cambios[$i]["contenido"]["Categorias"]); $i++) {
-                        $categoria = json_decode($cambios[$i]["contenido"]["Categorias"][$i]);
-                        $categoria_ = Categoria::where("users_id", Auth::user()->id)->where("titulo", $categoria["titulo"])->get();
-                        if (count($categoria_) > 0) {
-                            $carta->categorias()->attach($categoria_[0]);
-                        }
+
+                    foreach ($datos[$i]->Categorias as $key => $value) {
+                        $category = Categoria::where('users_id',  Auth::user()->id)->where('titulo', $value->titulo)->first();
+                        $carta->categorias()->attach($category);
                     }
 
-                    break;
-                case 'Categorias':
 
+                    break;
+                case 'categorias':
                     $categoria = new Categoria;
                     $categoria->users_id = Auth::user()->id;
-                    $categoria->titulo = $contenido["titulo"];
+                    $categoria->titulo = $datos[$i]->titulo;
                     $categoria->save();
-                    $id = $categoria->id;
                     break;
                 default:
                     # code...
                     break;
             }
-
-            $cambio = Cambio::create([
-                "users_id"              =>  Auth::user()->id,
-                'tabla'                 =>  $tabla,
-                "id_Relacionado"        =>  $id,
-                'accion'                =>  $accion,
-                'fecha'                 =>  $fecha
-            ]);
         }
     }
 }

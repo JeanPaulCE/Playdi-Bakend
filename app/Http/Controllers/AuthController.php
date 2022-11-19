@@ -40,14 +40,14 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('myapptoken', now()->addSeconds(10))->accessToken;
+        $token = $user->createToken('myapptoken', now()->addSeconds(10));
 
 
 
         $response = [
             'user' => $user,
-            'token' => $token,
-            'expired_at' => $token->expired_at
+            'token' => $token->plainTextToken,
+            'expired_at' => $token->accessToken->expired_at
         ];
 
         return response($response, 201);

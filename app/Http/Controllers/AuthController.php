@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,6 +42,16 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('myapptoken', now()->addSeconds(10));
+
+
+
+        $categoria = new Categoria;
+        $categoria->users_id = $user->id;
+        $categoria->titulo = "Clasico";
+        $categoria->save();
+
+
+
 
 
 

@@ -8,7 +8,9 @@ use App\Models\Carta;
 use App\Models\Categoria;
 use App\Models\Cambio;
 use App\Models\User;
+use App\Models\Shared;
 use Auth;
+use Illuminate\Support\Arr;
 use PhpParser\Node\Expr\Cast\String_;
 use PhpParser\Node\Stmt\Switch_;
 
@@ -27,9 +29,10 @@ class Game extends Controller
     public function cambios(Request $request)
     {
         //peticion sin contenido retorna todos los datos
+
         if (!$request->has("cambios")) return response($this->getAll(), 200);
 
-        $cambios = Cambio::where('users_id', Auth::user()->id)->get();
+        $cambios =  Cambio::where('users_id', Auth::user()->id)->get();
         $cambios_enviados =  json_decode($request->input("cambios"))->cambio;
         $cartas_enviados =  json_decode($request->input("cambios"))->cartas;
         $categorias_enviados =  json_decode($request->input("cambios"))->categorias;
@@ -60,26 +63,35 @@ class Game extends Controller
         if (count($cambios) > 1) {
             for ($i = 0; $i < count($cambios); $i++) {
                 $cambios[$i]["fecha"] = strtotime($cambios[$i]["fecha"]);
-                $aux2[$i] =  strtotime($cambios[$i]["fecha"]);
+                $aux2[$i] = $cambios[$i]["fecha"];
             }
+            $cambios = $cambios->toArray();
             array_multisort($aux2, SORT_DESC, $cambios);
+        } else {
+            $cambios[0]["fecha"] = strtotime($cambios[0]["fecha"]);
+            $cambios = $cambios->toArray();
         }
 
 
+        $fecha_local = $cambios[0]["fecha"];
+        $fecha_remota = strtotime($cambios_enviados->fecha);
+
         //si lo enviado y lo ya almacenado es lo mismo
-        if ($cambios[0]->fecha == $cambios_enviados->fecha) {
+        if ($fecha_local == $fecha_remota) {
             $res = [
                 "type" => 2
             ];
             return response($res, 200);
         }
 
-        $fecha_local = $cambios[0]->fecha;
-        $fecha_remota = $cambios_enviados->fecha;
+
+
+
 
         //lo enviado es mas antiguo que lo guardado, se retorna lo guardado
         if ($fecha_local > $fecha_remota) {
-            return response($this->getAll(), 204);
+
+            return response($this->getAll(), 200);
         } else {
             //lo enviado es mas reciente que lo guardado, se sustitulle lo guardado por lo enviado
             $this->aplyChanges("categorias", $categorias_enviados);
@@ -93,23 +105,23 @@ class Game extends Controller
             $cambio->fecha = $cambios_enviados->fecha;
             $cambio->save();
 
+            $re = $fecha_local > $fecha_remota;
 
             $res = [
                 "type" => 1
             ];
-            return response($res, 200);
+            return response($res, 201);
         }
     }
 
     //!!!!implementar tabla
     public function makeShare(Request $request)
     {
-        $categoria_recibida = $cambios_enviados =  json_decode($request->input("categoria"));
-        $compartido = new Compartido; //::where("codigo", $codigo)->where("nombre", $nombre);
-        $compartido->codigo =  substr((time() + ""), -5) + rand(10, 99);
-        $compartido->nombre =  Auth::user()->name;
+        $categoria_recibida =  json_decode($request->input("categoria"));
+        $compartido = new Shared; //::where("codigo", $codigo)->where("nombre", $nombre);
+        $compartido->id =  intval(substr((time() . ""), -6) + rand(10, 99));
         $compartido->users_id = Auth::user()->id;
-        $compartido->id_categoria = Categoria::where('users_id',  Auth::user()->id)->where('titulo', $categoria_recibida->titulo)->first()->id;
+        $compartido->categorias_id = Categoria::where('users_id',  Auth::user()->id)->where('titulo', $categoria_recibida->titulo)->first()->id;
         $compartido->save();
         return response($compartido, 201);
     }
@@ -147,7 +159,7 @@ class Game extends Controller
 
     private function getAll()
     {
-        $cartas = Carta::where('users_id', Auth::user()->id)->get();
+        $cartas = Carta::where('users_id', Auth::user()->id)->with('categorias')->get();
         $categorias = Categoria::where('users_id', Auth::user()->id)->get();
         $cambios = Cambio::where('users_id', Auth::user()->id)->get();
 

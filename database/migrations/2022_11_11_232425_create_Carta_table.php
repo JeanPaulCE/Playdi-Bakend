@@ -17,11 +17,9 @@ class CreateCartaTable extends Migration
             $table->id();
             $table->unsignedBigInteger('users_id')->index('fk_Carta_users_idx');
             $table->string('titulo', 85);
-            $table->string('reto', 275);
-            $table->string('castigo', 275);
+            $table->string('reto', 375);
+            $table->string('castigo', 375);
             $table->timestamps();
-
-
         });
     }
 

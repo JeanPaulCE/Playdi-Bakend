@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carta;
 use App\Models\Categoria;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
@@ -47,10 +48,27 @@ class AuthController extends Controller
 
         $categoria = new Categoria;
         $categoria->users_id = $user->id;
-        $categoria->titulo = "Clasico";
+        $categoria->titulo = "Clásico";
         $categoria->save();
 
 
+
+        $cartas = [
+            ["titulo" => "Baila y baila", "reto" => "Baila una coreografía original que dure entre 15 a 30 segundos con la música que elija quien está a tu derecha", "castigo" => "Recita un poema al estilo de Pablo Neruda"],
+            ["titulo" => "¿Qué viste?", "reto" => "Di cuatro cosas que pensaste la primera vez que viste a la persona de tu izquierda, s TOTALMENTE sinceras", "castigo" => "Que la persona elija tu castigo por no contestar"],
+            ["titulo" => "¿Amigos = Ayuda?", "reto" => "Debes llamar a uno de tus contactos y decirle que ocupas su ayuda (inventa una historia creativa) Para ganar la persona debe de decir que te ayudara", "castigo" => "Recibir 5 nalgadas por parte de la persona que elija el grupo"],
+            ["titulo" => "¿Creativo?... Tal vez", "reto" => "Di el nombre de la persona que peor te cae de la sala y porqué. Sinceridad, ante. todo", "castigo" => "Tomar un vaso con salsa Lizano, consomé, azúcar, chile y chocolate. Los otros jugadores pueden incluir o quitar productos"],
+            ["titulo" => "Declaraciones", "reto" => "Llama por teléfono a un ser querido y tienes que hacerle una confesión acordada con el resto de jugadores", "castigo" => "Llama a tu ex (el grupo elije a cual) y dile que a pesar de todo lo quieres"],
+            ["titulo" => "¿Pero qué está pasando?", "reto" => "Sal a la calle y grita lo más fuerte que puedas", "castigo" => "Haz 50 flexiones sin parar en un minuto, si fallar lo tienes que repetir una vez más"]
+        ];
+
+        foreach ($cartas as $key => $carta) {
+            $carta_ = new Carta;
+            $carta_->users_id    =  $user->id;
+            $carta_->titulo      =  $carta["titulo"];
+            $carta_->reto        =  $carta["reto"];
+            $carta_->castigo     =  $carta["castigo"];
+        }
 
 
 

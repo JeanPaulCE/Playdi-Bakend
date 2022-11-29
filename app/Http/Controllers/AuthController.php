@@ -62,7 +62,7 @@ class AuthController extends Controller
             ["titulo" => "¿Pero qué está pasando?", "reto" => "Sal a la calle y grita lo más fuerte que puedas", "castigo" => "Haz 50 flexiones sin parar en un minuto, si fallar lo tienes que repetir una vez más"]
         ];
 
-        $categoria_id = Categoria::where('users_id',  Auth::user()->id)->where('titulo', 'Clásico')->first();
+        $categoria_id = Categoria::where('users_id',  $user->id)->where('titulo', 'Clásico')->first();
 
         foreach ($cartas as $key => $carta) {
             $carta_ = new Carta;

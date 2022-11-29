@@ -68,6 +68,8 @@ class AuthController extends Controller
             $carta_->titulo      =  $carta["titulo"];
             $carta_->reto        =  $carta["reto"];
             $carta_->castigo     =  $carta["castigo"];
+            $carta_->categorias()->attach();
+            $carta_->save();
         }
 
 

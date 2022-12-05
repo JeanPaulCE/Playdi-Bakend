@@ -59,7 +59,16 @@ class AuthController extends Controller
             ["titulo" => "¿Amigos = Ayuda?", "reto" => "Debes llamar a uno de tus contactos y decirle que ocupas su ayuda (inventa una historia creativa) Para ganar la persona debe de decir que te ayudara", "castigo" => "Recibir 5 nalgadas por parte de la persona que elija el grupo"],
             ["titulo" => "¿Creativo?... Tal vez", "reto" => "Di el nombre de la persona que peor te cae de la sala y porqué. Sinceridad, ante. todo", "castigo" => "Tomar un vaso con salsa Lizano, consomé, azúcar, chile y chocolate. Los otros jugadores pueden incluir o quitar productos"],
             ["titulo" => "Declaraciones", "reto" => "Llama por teléfono a un ser querido y tienes que hacerle una confesión acordada con el resto de jugadores", "castigo" => "Llama a tu ex (el grupo elije a cual) y dile que a pesar de todo lo quieres"],
-            ["titulo" => "¿Pero qué está pasando?", "reto" => "Sal a la calle y grita lo más fuerte que puedas", "castigo" => "Haz 50 flexiones sin parar en un minuto, si fallar lo tienes que repetir una vez más"]
+            ["titulo" => "¿Pero qué está pasando?", "reto" => "Sal a la calle y grita lo más fuerte que puedas", "castigo" => "Haz 50 flexiones sin parar en un minuto, si fallar lo tienes que repetir una vez más"],
+            ["titulo" => "La actuación", "reto" => "Hazte pasar por la persona que tienes al frente hasta tu siguiente reto", "castigo" => "Cambiar de ropa con esa persona durante 30 minutos"],
+            ["titulo" => "Que voz", "reto" => "Cántale una canción romántica a la persona que quieras dentro de la sala", "castigo" => "¡Castigo libre! En este los otros jugadores deciden cuál será el castigo"],
+            ["titulo" => "Número equivocado", "reto" => "Marca un número random y pide una receta para la hemorroides y diarrea", "castigo" => "Muestra las últimas 10 fotos de tu celular"],
+            ["titulo" => "Vergüenza…noooo", "reto" => "En tu historia de Instagram y tu estado de WhatsApp pública algo vergonzoso", "castigo" => "Llama a uno de tus contactos y cuéntale un secreto que le ocultaras"],
+            ["titulo" => "El amor", "reto" => "Escríbele un mensaje o llama a la persona que te gusta diciéndole lo que sientes. Si es en mensaje tienes que mostrar la conversación", "castigo" => "Declárate a alguna de las personas de la sala como si fuera la persona que te gusta, finaliza con un beso"],
+            ["titulo" => "Que linda amistad", "reto" => "Pon como tu foto de perfil a un amig@ por x días", "castigo" => "Deja que alguien del grupo lea tus mensajes"],
+            ["titulo" => "Revelación", "reto" => "Cuéntale al grupo cuál es tu mayor secreto", "castigo" => "Juega a besar, casar o matar; las personas las eligen los otros jugadores"],
+            ["titulo" => "Saca la Bichota", "reto" => "Cambia tu ropa con las prendas que tus amigos elijan y dales la pasarela VIP que merecen", "castigo" => "Elige a dos personas más del grupo he intercambien sus prendas"],
+            ["titulo" => "Luces, cámara, imitación ", "reto" => "Da la mejor imitación de una de tus escenas favoritas en el cine ", "castigo" => "Nombra la película que a muchos en la sala les gusta y tú la odias, justifica tu respuesta"]
         ];
 
         $categoria_id = Categoria::where('users_id',  $user->id)->where('titulo', 'Clásico')->first();

@@ -1,63 +1,20 @@
-/*
--- Bold --
-font-family: Fira Sans;
-font-weight: 700;
-font-style: normal;
-
--- Regular --
-font-family: Fira Sans;
-font-weight: 400;
-font-style: normal;
-*/
-
-html {
-    font-size: 100%;
-    background-color: #fef5fa;
+:root {
+    --morado: #673AB7;
+    --verde: #008F39;
+    --amarillo: #F4A020;
+    --fondo: #F2EBFF;
+    --titulos: #292E37;
+    --texto: #525D73;
+    --texto-btn: #fff;
+    --btn: #673AB7;
+    --bg: #fff;
 }
 
-body {
-    margin: auto;
-    padding: 0;
+header>nav {
+    display: flex;
 }
 
-h1 {
-    font-family: Fira Sans;
-    font-weight: 700;
-    font-size: 50px;
-}
-
-p {
-    font-family: Fira Sans;
-    font-weight: 400;
-    font-size: 20px;
-}
-
-
-.mg {
-    margin-top: 8em;
-}
-
-.inner-col {
-    display: grid;
-    grid-auto-flow: column;
-    gap: 2em;
-    margin-left: 6em;
-    margin-right: 6em;
-}
-
-.playdi {
-    font-family: Fira Sans;
-    font-weight: 700;
-    font-size: 20px;
-}
-
-img.small {
-    width: 160px;
-    height: 140px;
-    margin-left: 4em;
-}
-
-img.medium {
-    width: 650px;
-    height: 600px;
+header>nav>div {
+    display: inline-flex;
+    background-color: #008F39;
 }

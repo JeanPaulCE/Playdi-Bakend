@@ -307,7 +307,7 @@ main>#hero>.content-hero>.col>img {
 .team-card>p:nth-child(2),
 .team-card>p:nth-child(3) {
     font-family: "Roboto", sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     color: #333333;
     opacity: 60%;
 }

@@ -69,12 +69,12 @@
                         </p>
                     </div>
                     <div class="image-col">
-                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial-1.png')}}" alt="" /></div>
+                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial1.png')}}" alt="" /></div>
                     </div>
                 </div>
                 <div class="card">
                     <div class="image-col">
-                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial-1.png')}}" alt="" /></div>
+                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial2.png')}}" alt="" /></div>
                     </div>
                     <div class="text-col derecha">
                         <p class="numero verde">2</p>
@@ -93,12 +93,12 @@
                         </p>
                     </div>
                     <div class="image-col">
-                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial-1.png')}}" alt="" /></div>
+                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial3.png')}}" alt="" /></div>
                     </div>
                 </div>
                 <div class="card">
                     <div class="image-col">
-                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial-1.png')}}" alt="" /></div>
+                        <div class="circulo"> <img class="mockup" src=" {{ asset('/imgs/tutorial4.png')}}" alt="" /></div>
                     </div>
                     <div class="text-col derecha">
                         <p class="numero amarillo">4</p>
